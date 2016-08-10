@@ -28,6 +28,7 @@
 #
 
 import sys
+import codecs
 
 PY3 = sys.version_info[0] == 3
 
@@ -129,8 +130,7 @@ def _format_datetime(feed_type, dtime):
     """
 
     # First, convert time into a time structure
-    if not type(dtime) is time.struct_time:
-        dtime = _convert_datetime(dtime)
+    dtime = _convert_datetime(dtime)
 
     # Then, convert that to the appropriate string
     if feed_type is "rss2":
@@ -171,6 +171,7 @@ def _atomise_author(author):
     atom:Person construct.
     """
 
+    print(type(author))
     if type(author) is dict:
         return author
     else:
@@ -403,7 +404,7 @@ class Feed(object):
         """Format the feed as RSS 1.0 and save the result to a file."""
 
         string = self.format_rss1_string(validate, pretty)
-        handle = open(filename, "w")
+        handle = codecs.open(filename, "w", 'utf-8')
         handle.write(string)
         handle.close()
 
@@ -457,7 +458,7 @@ class Feed(object):
         """Format the feed as RSS 2.0 and save the result to a file."""
 
         string = self.format_rss2_string(validate, pretty)
-        handle = open(filename, "w")
+        handle = codecs.open(filename, "w", 'utf-8')
         handle.write(string)
         handle.close()
 
@@ -496,7 +497,7 @@ class Feed(object):
         """Format the feed as Atom 1.0 and save the result to a file."""
 
         string = self.format_atom_string(validate, pretty)
-        handle = open(filename, "w")
+        handle = codecs.open(filename, "w", 'utf-8')
         handle.write(string)
         handle.close()
 
@@ -586,10 +587,10 @@ _atom_item_mappings = (
     (("link", "url"), "link", lambda x: _atomise_link(x, rel='alternate')),
     (("id", "link", "url"), "id", _atomise_id),
     (("description", "desc", "summary"), "summary"),
-    (("content",), "content", _format_content),
-    (("pubDate_parsed", "pubdate_parsed", "date_parsed", "published_parsed", "updated_parsed", "pubDate", "pubdate", "date", "published", "updated"), "published",
+    (("summary", "content",), "content", _format_content),
+    (("pubDate_parsed", "pubdate_parsed", "date_parsed", "published_parsed", "pubDate", "pubdate", "date", "published"), "published",
         lambda x: _format_datetime("atom",x)),
-    (("updated",), "updated", lambda x: _format_datetime("atom",x)),
+    (("updated_parsed", "updated"), "updated", lambda x: _format_datetime("atom",x)),
     (("category",), "category"),
     (("author",), "author", _atomise_author)
 )
